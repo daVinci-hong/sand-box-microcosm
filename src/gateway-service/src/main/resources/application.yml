@@ -1,0 +1,55 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      routes:
+        # ----------------------------------------------------------
+        # 規則編號：beacon_service_route
+        # 職責：將所有發往 /api/beacon/ 的外部請求，安全地路由至 beacon-service
+        # ----------------------------------------------------------
+        - id: beacon_service_route
+          uri: http://beacon-service:8081
+          predicates:
+            # 斷言：僅當請求路徑匹配 /api/beacon/** 模式時，此規則才生效。
+            - Path=/api/beacon/**
+          filters:
+            # 過濾器 1：重寫路徑。
+            # 意圖：剝離掉網關層的 /api/beacon 前綴，將一個純淨的請求
+            #       (例如 /actuator/health) 轉發給下遊服務。
+            - StripPrefix=2
+            # 過濾器 2：應用熔斷器。
+            # 意圖：將名為 'beacon-service-cb' 的熔斷器，包裹在此次轉發操作之外。
+            - name: CircuitBreaker
+              args:
+                name: beacon-service-cb
+                fallbackUri: forward:/fallback/beacon
+            # 過濾器 3：應用我們剛剛鑄造的「認證衛兵」
+            - AuthenticationFilter
+
+# =================================================================
+# ADR-003: JWT 安全密鑰配置
+# 該值應在生產環境中，通過環境變量進行覆蓋。
+# =================================================================
+jwt:
+  secret: ${JWT_SECRET_KEY:your-default-super-secret-key-for-local-dev-and-testing}
+
+# ----------------------------------------------------------
+# Resilience4j 熔斷器配置
+# ----------------------------------------------------------
+resilience4j:
+  circuitbreaker:
+    instances:
+      # 熔斷器實例名稱，必須與上方 filter 中的 name 匹配。
+      beacon-service-cb:
+        # 在一個 10 次請求的滑動窗口中
+        sliding-window-size: 10
+        # 如果失敗率達到 50%
+        failure-rate-threshold: 50
+        # 則將熔斷器開啟 10 秒。
+        wait-duration-in-open-state: 10s
+        # 允許在半開狀態下，通過 3 次請求來試探下遊服務是否恢復。
+        permitted-number-of-calls-in-half-open-state: 3

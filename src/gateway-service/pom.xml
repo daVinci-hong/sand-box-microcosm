@@ -20,13 +20,56 @@
 
     <!-- 3. 引入自己需要的工具 -->
     <dependencies>
+        <!-- 核心修正：徹底移除 spring-boot-starter-web -->
+
+        <!-- 為註解式的響應式控制器，提供完整的 WebFlux 工具集 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+        <!-- [移除] 不再需要 Web 依賴，Gateway 基於 WebFlux -->
+        <!--
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+        -->
+        <!-- Spring Cloud Gateway 核心依賴 -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-gateway</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <!-- ===================================================================== -->
+            <!-- == 核心修正：換裝為響應式的、適用於 Gateway 的 Circuit Breaker == -->
+            <!-- ===================================================================== -->
+            <artifactId>spring-cloud-starter-circuitbreaker-reactor-resilience4j</artifactId>
+        </dependency>
+
+        <!-- Actuator 監控端點依賴 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- ================================================================= -->
+        <!-- == ADR-003: 引入 JJWT 核心依賴，用於 JWT 認證與授權 == -->
+        <!-- ================================================================= -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 

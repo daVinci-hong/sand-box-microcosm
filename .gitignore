@@ -10,7 +10,8 @@
 .idea/dictionaries/
 .idea/jsLibraryMappings.xml
 .idea/libraries/
-
+.idea/misc.xml
+.idea/remote-targets.xml
 # Sensitive information
 .idea/dataSources.xml
 .idea/dataSources.local.xml

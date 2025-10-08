@@ -8,7 +8,8 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.3</version> <!-- Or latest stable version -->
+        <!-- 升級至與 Spring Cloud 2023.0.0 兼容的 3.2.x 版本 -->
+        <version>3.2.5</version>
         <relativePath/>
     </parent>
 
@@ -34,6 +35,38 @@
 
     <properties>
         <java.version>21</java.version>
+        <!-- [新增] 統一管理 Spring Cloud 版本 -->
+        <spring-cloud.version>2023.0.0</spring-cloud.version>
     </properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 
+            <!-- ================================================================= -->
+            <!-- == CRITICAL FIX: 在"家族法典"中，正式納管 JJWT 的版本 == -->
+            <!-- ================================================================= -->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>0.12.3</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>0.12.3</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>0.12.3</version>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
 </project>

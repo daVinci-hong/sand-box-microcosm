@@ -1,6 +1,6 @@
 # ADR-002: 採用 Spring Cloud Gateway 處理 API 邊界，並引入 Resilience4j 實現容錯
 
-**狀態：** 提議中 (Proposed)
+**狀態：** 已接納 (Accepted)
 **日期：** 【2025-09-04】
 
 ---
