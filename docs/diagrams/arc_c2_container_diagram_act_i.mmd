@@ -1,0 +1,30 @@
+graph LR
+    %% C2 - Container Diagram for Act I
+
+    A["<b>指揮官 / 開發人員</b>"]
+    
+    %% Mediator node for the label
+    L1["發起 API 請求<br>(HTTP/S)"]
+
+    subgraph "Docker 容器化環境 (本地)"
+        direction LR
+        C1["
+            <b>Gateway Service</b>
+            [容器: Spring Boot]
+            負責未來所有外部請求的入口。
+            (port : 8080)
+        "]
+
+        C2["
+            <b>Beacon Service</b>
+            [容器: Spring Boot]
+            核心業務邏輯的承載者。
+            (port : 8081)
+        "]
+    end
+
+    %% Connections in an LR layout
+    A --> L1
+    L1 --> C1
+    
+    C1 -- "未來可能的內部調用" --> C2

@@ -1,0 +1,24 @@
+graph LR
+    %% C1 - System Context Diagram for The War Table Microcosm
+
+    A["
+        <b>指揮官 / 開發人員</b>
+        [角色]
+        專案的創造、使用與維護者。
+    "]
+
+    subgraph "沙盤微縮宇宙生態系"
+        C1["
+            <b>沙盤微縮宇宙</b>
+            一個在本地運行、自給自足的微服務技術展演與思想實踐平台。
+        "]
+    end
+
+    Ext1["
+        <b>GitHub</b>
+        [外部系統]
+        提供原始碼託管與 CI/CD 自動化能力。
+    "]
+
+    A -- "透過 Git & CLI<br>進行開發、構建與部署" --> C1
+    C1 -- "讀取/寫入<br>原始碼與工作流" --> Ext1

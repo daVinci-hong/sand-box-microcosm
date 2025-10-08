@@ -1,0 +1,22 @@
+graph TD
+    %% CI/CD Pipeline Diagram for the Pull Request Quality Gate
+
+    A["開發人員<br>在特性分支上提交代碼"] --> B{{"創建拉取請求<br>(Pull Request)<br>目標: main 分支"}}
+    
+    B -.-> C{"GitHub Actions<br>自動觸發"}
+    
+    subgraph "PR Quality Gate (合併前檢查)"
+        direction LR
+        C --> S1["1 檢出代碼"]
+        S1 --> S2["2 設置 Java 環境"]
+        S2 --> S3["3 Maven 構建與測試"]
+        S3 --> S4["4 Docker 鏡像構建"]
+    end
+
+    S4 -- "成功" --> R1["<font color=green><b>檢查通過</b></font><br>允許合併"]
+    S4 -- "失敗" --> R2["<font color=red><b>檢查失敗</b></font><br>禁止合併"]
+
+    R1 --> M["指揮官審查後<br>手動合併到 main 分支"]
+
+    classDef trigger fill:#f9f,stroke:#333,stroke-width:2px;
+    class B,C trigger;

@@ -1,0 +1,21 @@
+# =================================================================
+# Project Da Vinci - Line Ending Unification Protocol
+# File: .gitattributes
+# Purpose: To enforce consistent line endings across all platforms
+#          and prevent CRLF contamination in the WSL environment.
+# =================================================================
+
+# 將所有文本文件，在提交時自動轉換為 LF，在 Windows 平台檢出時，
+# 為了兼容性，可以轉換回 CRLF。Git 會智能處理。
+* text=auto
+
+# --- 絕對的、不可妥協的鐵律 ---
+# 以下文件類型，無論在任何平台，都必須、永遠、強制性地使用 LF 換行符。
+# 這對於 Shell 腳本和配置文件至關重要。
+*.sh      text eol=lf
+*.yml     text eol=lf
+*.xml     text eol=lf
+*.md      text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+Dockerfile text eol=lf

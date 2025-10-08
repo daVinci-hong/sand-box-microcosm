@@ -1,0 +1,19 @@
+# 定義我們宇宙中的所有服務單元
+services:
+  # 定義 gateway-service
+  gateway-service:
+    build:
+      context: .  # 將整個專案根目錄作為構建上下文，以便 Dockerfile 能訪問到父 POM
+      dockerfile: src/gateway-service/Dockerfile # 明確指定 Dockerfile 的路徑
+    ports:
+      - "8080:8080" # 將主機的 8080 port 映射到容器的 8080 port 
+    container_name: gateway-service # 為容器指定一個易於識別的名稱
+  
+  # 定義 beacon-service
+  beacon-service:
+    build:
+      context: .
+      dockerfile: src/beacon-service/Dockerfile
+    ports:
+      - "8081:8081" # 將主機的 8081 port 映射到容器的 8081 port
+    container_name: beacon-service

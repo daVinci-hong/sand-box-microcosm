@@ -1,0 +1,51 @@
+# =================================================================
+# JetBrains IDEs (IntelliJ IDEA, etc.)
+# =================================================================
+
+# User-specific files
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/shelf/
+.idea/vcs.xml
+.idea/dictionaries/
+.idea/jsLibraryMappings.xml
+.idea/libraries/
+
+# Sensitive information
+.idea/dataSources.xml
+.idea/dataSources.local.xml
+.idea/dataSources/
+
+# Caches and indices
+.idea/caches/
+.idea/modules.xml
+
+# Gradle
+.gradle/
+build/
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+
+# Compiled class files
+*.class
+
+# Log files
+*.log
+
+# Package files
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+temp.md
