@@ -36,10 +36,10 @@ jobs:
       # --- 步驟 2: 設置 JDK ---
       # 設置 Java 環境以匹配我們 pom.xml 中定義的 <java.version>。
       # 注意：此處使用 Java 17 是為了與專案配置嚴格對齊，確保環境一致性。
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin' # Eclipse Temurin, 一個可靠的 OpenJDK 發行版
           cache: 'maven'         # 自動緩存 Maven 依賴，加速後續構建
 
