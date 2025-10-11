@@ -1,8 +1,8 @@
 # =================================================================
-# Project Da Vinci - Continuous Integration Workflow v2.0
+# Project Da Vinci - CI Quality Gate v2.1
 # File: .github/workflows/ci.yml
-# Purpose: To act as an automated Quality Gate for all Pull Requests
-#          targeting the main branch.
+# Purpose: To act as an automated Quality & Security Gate for all
+#          Pull Requests targeting the main branch.
 # =================================================================
 
 name: Project Da Vinci CI Quality Gate
@@ -20,10 +20,16 @@ on:
 # -----------------------------------------------------------------
 jobs:
   # 我們定義一個名為 'build-and-test' 的核心作業。
-  build-and-test:
+  build-and-test-and-scan: # 作業名稱已更新，以反映其新增職責
     # 此作業將運行在 GitHub 提供的最新版 Ubuntu 虛擬環境中。
     runs-on: ubuntu-latest
-
+    # =================================================================
+    # ==      【【【 唯一的、最終的、戰略耐心指令 】】】      ==
+    # =================================================================
+    # 我們，以最高權限，命令 GitHub，給予我們這份訂單，
+    # 長達 6 小時（360 分鐘）的、最長的“生命週期”。
+    # 這，是 GitHub 為公開倉庫，所提供的最高權限。
+    timeout-minutes: 360
     # -------------------------------------------------------------
     # 3. 步驟 (Steps)
     # -------------------------------------------------------------
@@ -59,10 +65,45 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # 為 gateway-service 構建鏡像
-      - name: Build Gateway Service Docker Image
-        run: docker build -t gateway-service:ci-build --file src/gateway-service/Dockerfile .
+      # =================================================================
+      # == 步驟 5: gateway-service 的建造與安全質檢 ==
+      # =================================================================
+      - name: Build Docker image for gateway-service
+        # 戰術附註：我們為鏡像打上一個明確的標籤，以便後續步驟引用。
+        # 路徑已根據我們的標準目錄結構進行校準。
+        run: docker build -t gateway-service:pr-${{ github.event.number }} --file src/gateway-service/Dockerfile .
 
-      # 為 beacon-service 構建鏡像
-      - name: Build Beacon Service Docker Image
-        run: docker build -t beacon-service:ci-build --file src/beacon-service/Dockerfile .
+      - name: Scan gateway-service image with Trivy
+        # 使用官方的 trivy-action 來執行掃描。
+        uses: aquasecurity/trivy-action@master
+        with:
+          # 掃描目標：指向我們剛剛構建的鏡像。
+          image-ref: 'gateway-service:pr-${{ github.event.number }}'
+          # 輸出格式：在日誌中以易於閱讀的表格形式展示結果。
+          format: 'table'
+          # 退出碼：如果發現了符合條件的漏洞，此 Action 將以退出碼 1 結束，
+          # 這將物理上導致整個 CI 作業失敗。
+          exit-code: '1'
+          # 忽略尚無官方補丁的漏洞。這是一個務實的選擇，讓我們專注於可立即修復的威脅。
+          ignore-unfixed: true
+          # 掃描類型：同時檢查操作系統層 (os) 和應用程序庫層 (library) 的漏洞。
+          vuln-type: 'os,library'
+          # 嚴重性閾值：只對 CRITICAL (危急) 和 HIGH (高危) 級別的漏洞觸發失敗。
+          # 這是我們的「鋼鐵紀律」。
+          severity: 'CRITICAL,HIGH'
+
+      # =================================================================
+      # == 步驟 6: beacon-service 的建造與安全質檢 ==
+      # =================================================================
+      - name: Build Docker image for beacon-service
+        run: docker build -t beacon-service:pr-${{ github.event.number }} --file src/beacon-service/Dockerfile .
+
+      - name: Scan beacon-service image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'beacon-service:pr-${{ github.event.number }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'

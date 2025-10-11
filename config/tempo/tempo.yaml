@@ -1,0 +1,37 @@
+server:
+  http_listen_port: 3200
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+
+# 存儲配置：定義追蹤數據的存放方式
+storage:
+  trace:
+    # 使用本地文件系統作為後端存儲（適用於 POC）
+    backend: local
+    local:
+      path: /tmp/tempo/traces
+
+# 自動化的數據清理策略
+compactor:
+  compaction:
+    compaction_window: 1h
+    block_retention: 24h # 追蹤數據保留 24 小時
+
+# 減少數據處理延遲的配置
+ingester:
+  # 減少 trace 完成的等待時間
+  trace_idle_period: 10s
+  # 減少 block 切換的時間間隔
+  max_block_duration: 30s
+  # 減少 block 大小以更快處理
+  max_block_bytes: 1048576 # 1MB
+
+# 查詢前端配置，提高查詢性能
+query_frontend:
+  # 減少查詢的並行度以降低延遲
+  max_outstanding_per_tenant: 100

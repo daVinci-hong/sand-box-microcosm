@@ -1,0 +1,62 @@
+# Grafana Provisioning API 版本
+apiVersion: 1
+
+# 定義需要被自動配置的數據源列表
+datasources:
+  # 數據源一：我們的核心 Prometheus
+  - name: Prometheus-Main
+    type: prometheus
+    # 訪問模式：由 Grafana 的後端代理所有請求，更安全
+    access: proxy
+    # 數據源地址：使用 Docker 內部 DNS 指向我們的 Prometheus 容器
+    url: http://prometheus:9090
+    # 將此數據源設置為默認，方便查詢
+    isDefault: true
+
+  # =================================================================
+  # == 數據源二：Loki-Main (日誌之眼) v2.0 ==
+  # =================================================================
+  - name: Loki-Main
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    jsonData:
+      # 派生字段：建立從“日誌”到“追蹤”的血緣關係
+      derivedFields:
+        # =================================================================
+        # == ADR-009: 當在日誌中，發現一個名為 'traceID' 的字段時... ==
+        # =================================================================
+        - name: TraceID
+          # ...它將被自動關聯到我們的 Tempo 數據源
+          datasourceUid: 'Tempo-Main'
+          # 並且，點擊它，將會直接在 Tempo 中，查詢這個 Trace ID
+          # （注意：此處的 internalLink 屬性是 Grafana 9+ 的推薦寫法）
+          internalLink:
+            datasourceUid: 'Tempo-Main'
+            query: '$${__value.raw}'
+
+  # =================================================================
+  # == 數據源三：Tempo-Main (追蹤之眼) v2.0 ==
+  # =================================================================
+  - name: Tempo-Main
+    type: tempo
+    access: proxy
+    url: http://tempo:3200
+    jsonData:
+      # =================================================================
+      # == ADR-009: 建立從“追蹤”到“日誌”的血緣關係 ==
+      # =================================================================
+      tracesToLogs:
+        # 關聯到我們的 Loki 數據源
+        datasourceUid: 'Loki-Main'
+        # 使用 'container' 和 'job' 標籤，來縮小日誌的查詢範圍
+        # （注意：OTel Agent 會自動添加 'service.name' 作為標籤，
+        #  我們應優先使用它，以獲得更精準的關聯）
+        tags: ['service.name', 'container']
+        # 篩選條件：只顯示 INFO 級別及以上的日誌
+        filterByLogLevel: 'info'
+      # =================================================================
+      # == ADR-008: 建立從“追蹤”到“指標”的血緣關係 ==
+      # =================================================================
+      serviceMap:
+        datasourceUid: 'Prometheus-Main'

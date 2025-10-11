@@ -28,6 +28,33 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.projectdavinci</groupId>
+            <artifactId>common-library</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- ================================================================= -->
+        <!-- == ADR-005: 植入 Spring for Apache Kafka 神經接口 == -->
+        <!-- ================================================================= -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+        <!-- ================================================================= -->
+        <!-- == ADR-006: 植入 Micrometer 生命體徵傳感器 (Prometheus 格式) == -->
+        <!-- ================================================================= -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+
+        <!-- ================================================================= -->
+        <!-- ==      【新增】日誌模塊依賴 (無版本)      == -->
+        <!-- ================================================================= -->
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+        </dependency>
     </dependencies>
 
     <!-- 4. Add the Spring Boot Maven Plugin for packaging -->

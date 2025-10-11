@@ -29,6 +29,12 @@ spring:
                 fallbackUri: forward:/fallback/beacon
             # 過濾器 3：應用我們剛剛鑄造的「認證衛兵」
             - AuthenticationFilter
+  kafka:
+    bootstrap-servers: kafka:9092 # 指向 Docker 內部 DNS
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      # 使用 JSON 序列化器來發送我們的事件對象
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 # =================================================================
 # ADR-003: JWT 安全密鑰配置
@@ -53,3 +59,11 @@ resilience4j:
         wait-duration-in-open-state: 10s
         # 允許在半開狀態下，通過 3 次請求來試探下遊服務是否恢復。
         permitted-number-of-calls-in-half-open-state: 3
+
+#ADR-006: Micrometer 與 Prometheus 生命體徵配置
+management:
+  endpoints:
+    web:
+      exposure:
+        # 在原有的 health, info 基礎上，新增 prometheus 端點
+        include: health,info,prometheus

@@ -1,0 +1,14 @@
+# Grafana Provisioning API 版本
+apiVersion: 1
+
+# 定義儀表板的供應者
+providers:
+- name: 'Project Da Vinci Dashboards' # 為我們的供應者命名
+  orgId: 1
+  folder: '' # 將儀表板放置在根文件夾
+  type: file
+  disableDeletion: false # 允許在文件被刪除時，自動刪除儀表板
+  editable: true # 允許在 UI 中對儀表板進行編輯
+  options:
+    # 告知 Grafana，應在此路徑下，尋找我們的儀表板“靈魂法典”
+    path: /etc/grafana/provisioning/dashboards

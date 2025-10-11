@@ -1,0 +1,14 @@
+# 全局配置：定義 Prometheus 的核心運作參數
+global:
+  scrape_interval: 15s # 每 15 秒，對所有目標進行一次生命體徵採集
+  evaluation_interval: 15s
+
+# 偵察任務配置：定義需要監控的目標群體
+scrape_configs:
+  # 任務一：偵察所有基於 Spring Micrometer 的微服務
+  - job_name: 'spring-micrometer-services'
+    # 指定從目標的哪個路徑採集指標數據
+    metrics_path: '/actuator/prometheus'
+    # 靜態配置：直接列出所有需要偵察的目標
+    static_configs:
+      - targets: ['gateway-service:8080', 'beacon-service:8081']

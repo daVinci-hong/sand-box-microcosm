@@ -1,0 +1,25 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: beacon-service
+
+  kafka:
+    bootstrap-servers: kafka:9092
+    consumer:
+      group-id: beacon_service_group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      # 使用 JSON 反序列化器來解析事件對象
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      # 信任我們的事件契約所在的包
+      properties:
+        spring.json.trusted.packages: "com.projectdavinci.common.events"
+
+#ADR-006: Micrometer 與 Prometheus 生命體徵配置
+management:
+  endpoints:
+    web:
+      exposure:
+        # 在原有的 health, info 基礎上，新增 prometheus 端點
+        include: health,info,prometheus

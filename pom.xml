@@ -8,8 +8,8 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <!-- 升級至與 Spring Cloud 2023.0.0 兼容的 3.2.x 版本 -->
-        <version>3.2.5</version>
+        <!-- gateway service build 不起來，版本有問題，再往上升 -->
+        <version>3.3.11</version>
         <relativePath/>
     </parent>
 
@@ -31,12 +31,27 @@
     <modules>
         <module>src/gateway-service</module>
         <module>src/beacon-service</module>
+        <module>src/common-library</module>
     </modules>
 
     <properties>
         <java.version>21</java.version>
         <!-- [新增] 統一管理 Spring Cloud 版本 -->
-        <spring-cloud.version>2023.0.0</spring-cloud.version>
+        <spring-cloud.version>2023.0.1</spring-cloud.version>
+
+        <!-- ================================================================= -->
+        <!-- == ADR-004 Security Fix: Override Netty version to patch CVE     == -->
+        <!-- ================================================================= -->
+        <netty.version>4.1.124.Final</netty.version>
+
+        <!-- 我們可以移除或保留 spring-cloud-gateway.version，因為接下來的聲明更強力 -->
+        <spring-cloud-gateway.version>4.1.8</spring-cloud-gateway.version>
+
+        <!-- ===================================================================== -->
+        <!-- == ADR-004 Final Security Fix: Pinpoint upgrade for Tomcat Core    == -->
+        <!-- ===================================================================== -->
+        <tomcat.version>10.1.44</tomcat.version>
+        <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -67,6 +82,35 @@
                 <version>0.12.3</version>
             </dependency>
 
+            <!-- ===================================================================== -->
+            <!-- == ADR-004 Final Security Fix: The Presidential Executive Order    == -->
+            <!-- ===================================================================== -->
+            <!-- 我們在此，以最高權限，直接聲明 Gateway Server 的唯一合法版本 -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-gateway-server</artifactId>
+                <version>4.1.8</version>
+            </dependency>
+
+            <!-- Spring Cloud 的 BOM 依然在此處，但我們上面的直接聲明，將覆蓋它的建議 -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>net.logstash.logback</groupId>
+                <artifactId>logstash-logback-encoder</artifactId>
+                <version>${logstash-logback-encoder.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.projectdavinci</groupId>
+                <artifactId>common-library</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>
