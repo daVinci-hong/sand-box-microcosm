@@ -43,6 +43,8 @@ buildNumber.properties
 
 # Package files
 *.jar
+# 例外：允許 OpenTelemetry Java Agent 上傳到 Git
+!agents/opentelemetry-javaagent.jar
 *.war
 *.ear
 *.zip
