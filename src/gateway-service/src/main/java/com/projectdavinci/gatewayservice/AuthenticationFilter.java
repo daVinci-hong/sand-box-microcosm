@@ -1,7 +1,6 @@
 package com.projectdavinci.gatewayservice;
 
 import io.jsonwebtoken.Claims;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
@@ -9,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -16,11 +16,15 @@ import java.util.List;
 @Component
 public class AuthenticationFilter extends AbstractGatewayFilterFactory<AuthenticationFilter.Config> {
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    // 核心修正：移除 @Autowired，聲明為 final，以確保依賴的絕對可靠性
+    private final RouteValidator routeValidator;
+    private final JwtUtil jwtUtil;
 
-    public AuthenticationFilter() {
+    // 核心修正：使用構造函數注入，這是所有可測試性的根基
+    public AuthenticationFilter(RouteValidator routeValidator, JwtUtil jwtUtil) {
         super(Config.class);
+        this.routeValidator = routeValidator;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
@@ -28,8 +32,11 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
         return (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
 
-            // 1. 檢查是否為無需認證的公開路徑 (例如登錄、註冊)
-            //    此處暫時跳過，默認所有路徑都需要認證。
+            // 1. 豁免權檢查：首先，檢查此路由是否為一個無需認證的公開路由。
+            if (!routeValidator.isSecured(request)) {
+                // 如果是，則立即放行，跳過所有後續的 JWT 驗證。
+                return chain.filter(exchange);
+            }
 
             // 2. 檢查 Authorization 頭是否存在
             if (!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
@@ -65,9 +72,9 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
         };
     }
 
+    // 核心修正：不再依賴 exchange.getResponse()，而是直接在響應式流中，廣播一個標準的錯誤信號。
     private Mono<Void> onError(ServerWebExchange exchange, String err, HttpStatus httpStatus) {
-        exchange.getResponse().setStatusCode(httpStatus);
-        return exchange.getResponse().setComplete();
+        return Mono.error(new ResponseStatusException(httpStatus, err));
     }
 
     public static class Config {

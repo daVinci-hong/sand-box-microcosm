@@ -1,0 +1,70 @@
+graph TD
+    %% C2 - Container Diagram for Act III: The All-Seeing Eye
+    %% Version 3.0 - Epic Upgrade
+
+    A["<b>指揮官 / 開發人員</b>"]
+
+    subgraph "主應用系統"
+        direction LR
+        C1["
+            <b>Gateway Service</b>
+            <br>
+            [容器: Spring Cloud Gateway]
+            <br>
+            <br>
+            職責: API 路由, JWT 驗證
+            <br>
+            <b>角色: 事件生產者</b>
+        "]
+
+        Kafka["
+            <b>Apache Kafka</b>
+            <br>
+            [容器: Kafka KRaft]
+            <br>
+            <br>
+            宇宙的中央神經系統
+        "]
+
+        C2["
+            <b>Beacon Service</b>
+            <br>
+            [容器: Spring Boot]
+            <br>
+            <br>
+            <b>角色: 事件消費者</b>
+        "]
+    end
+
+    subgraph "全知之眼 - 可觀測性系統"
+        direction LR
+        
+        subgraph "數據採集層"
+            Prometheus["<b>Prometheus</b><br>指標採集"]
+            Loki["<b>Loki</b><br>日誌聚合"]
+            Tempo["<b>Tempo</b><br>追蹤存儲"]
+        end
+
+        Grafana["
+            <b>Grafana</b>
+            <br>
+            [容器: Grafana]
+            <br>
+            <br>
+            統一儀表板 (神之瞳)
+        "]
+    end
+
+    %% Data Flows
+    A -- "1 API 請求" --> C1
+    C1 -- "2 發布事件" --> Kafka
+    Kafka -- "3 消費事件" --> C2
+
+    C1 -- "遙測數據 (指標,日誌,追蹤)" --> Prometheus & Loki & Tempo
+    C2 -- "遙測數據 (指標,日誌,追蹤)" --> Prometheus & Loki & Tempo
+    
+    Prometheus --> Grafana
+    Loki --> Grafana
+    Tempo --> Grafana
+
+    A -- "觀察與洞察" --> Grafana

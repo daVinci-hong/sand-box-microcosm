@@ -17,24 +17,42 @@ spring:
             # 斷言：僅當請求路徑匹配 /api/beacon/** 模式時，此規則才生效。
             - Path=/api/beacon/**
           filters:
-            # 過濾器 1：重寫路徑。
-            # 意圖：剝離掉網關層的 /api/beacon 前綴，將一個純淨的請求
-            #       (例如 /actuator/health) 轉發給下遊服務。
-            - StripPrefix=2
-            # 過濾器 2：應用熔斷器。
-            # 意圖：將名為 'beacon-service-cb' 的熔斷器，包裹在此次轉發操作之外。
+            # 第一道防線：限流器 (Rate Limiter)
+            - name: RateLimiter
+              args:
+                name: beacon-service-rl
+            # 新增第二道防線：艙壁隔離 (Bulkhead)
+            - name: Bulkhead
+              args:
+                name: beacon-service-bh
+            # 第三道防線：熔斷器 (Circuit Breaker)
             - name: CircuitBreaker
               args:
                 name: beacon-service-cb
                 fallbackUri: forward:/fallback/beacon
-            # 過濾器 3：應用我們剛剛鑄造的「認證衛兵」
             - AuthenticationFilter
+            - StripPrefix=2
+
   kafka:
     bootstrap-servers: kafka:9092 # 指向 Docker 內部 DNS
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       # 使用 JSON 序列化器來發送我們的事件對象
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  
+  # ----------------------------------------------------------
+  # Redis 配置 (用於分散式 Rate Limiting)
+  # ----------------------------------------------------------
+  data:
+    redis:
+      host: redis
+      port: 6379
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
 
 # =================================================================
 # ADR-003: JWT 安全密鑰配置
@@ -43,22 +61,41 @@ spring:
 jwt:
   secret: ${JWT_SECRET_KEY:your-default-super-secret-key-for-local-dev-and-testing}
 
+
+
 # ----------------------------------------------------------
-# Resilience4j 熔斷器配置
+# Resilience4j 韌性配置
 # ----------------------------------------------------------
 resilience4j:
   circuitbreaker:
     instances:
       # 熔斷器實例名稱，必須與上方 filter 中的 name 匹配。
       beacon-service-cb:
-        # 在一個 10 次請求的滑動窗口中
-        sliding-window-size: 10
-        # 如果失敗率達到 50%
-        failure-rate-threshold: 50
-        # 則將熔斷器開啟 10 秒。
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 3 # 在 3 次調用中
+        failure-rate-threshold: 50 # 失敗率達到 50% (即 2 次失敗)
         wait-duration-in-open-state: 10s
-        # 允許在半開狀態下，通過 3 次請求來試探下遊服務是否恢復。
-        permitted-number-of-calls-in-half-open-state: 3
+        permitted-number-of-calls-in-half-open-state: 2 # HALF_OPEN 狀態下允許 2 次測試調用
+
+
+  # ----------------------------------------------------------
+  # Rate Limiter 配置 (速率限制器)
+  # ----------------------------------------------------------
+  ratelimiter:
+    instances:
+      beacon-service-rl:
+        limit-for-period: 20 # 每秒，允許 20 次請求
+        limit-refresh-period: 1s
+        timeout-duration: 0
+
+  # ----------------------------------------------------------
+  # Bulkhead 配置 (艙壁隔離)
+  # ----------------------------------------------------------
+  bulkhead:
+    instances:
+      beacon-service-bh:
+        max-concurrent-calls: 10 # 最大併發調用數為 10
+        max-wait-duration: 0s
 
 #ADR-006: Micrometer 與 Prometheus 生命體徵配置
 management:
@@ -66,4 +103,19 @@ management:
     web:
       exposure:
         # 在原有的 health, info 基礎上，新增 prometheus 端點
-        include: health,info,prometheus
+        # =================================================================
+        # == 【【【暴露“韌性”管理端點 】】】 ==
+        # =================================================================
+        include: health, info, prometheus, circuitbreakers, ratelimiters, bulkheads
+
+# ... (logging config 保持不變) ...
+logging:
+  level:
+    # 將根日誌級別，設置為 INFO
+    root: INFO
+    # 將我們自己的代碼，設置為 DEBUG，以看到最詳細的日誌
+    com.projectdavinci: DEBUG
+    # 將 Resilience4j，設置為 DEBUG，以看到所有韌性組件的決策過程
+    io.github.resilience4j: DEBUG
+    # 將 Spring Cloud Gateway，設置為 TRACE，以看到最底層的路由與過濾器細節
+    org.springframework.cloud.gateway: TRACE

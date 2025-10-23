@@ -1,0 +1,64 @@
+# =================================================================
+# == Docker 構建優化：排除不必要的文件和目錄 ==
+# =================================================================
+
+# Git 相關
+.git
+.gitignore
+.gitattributes
+
+# IDE 相關
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# 編譯輸出
+target/
+*.class
+*.jar
+*.war
+
+# 日誌文件
+logs/
+*.log
+
+# 測試報告
+**/surefire-reports/
+**/failsafe-reports/
+
+# 臨時文件
+*.tmp
+*.temp
+temp/
+
+# OS 相關
+.DS_Store
+Thumbs.db
+
+# Docker 相關
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# 文檔和腳本
+README.md
+*.md
+docs/
+scripts/
+
+# 配置文件（運行時不需要）
+config/
+agents/
+
+# 緩存目錄
+.cache/
+node_modules/
+
+# 測試相關
+**/*Test.java
+**/test/
+
+# Maven 本地倉庫（如果存在）
+.m2/

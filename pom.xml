@@ -46,12 +46,20 @@
 
         <!-- 我們可以移除或保留 spring-cloud-gateway.version，因為接下來的聲明更強力 -->
         <spring-cloud-gateway.version>4.1.8</spring-cloud-gateway.version>
-
+        <spring-framework.version>6.2.11</spring-framework.version>
         <!-- ===================================================================== -->
         <!-- == ADR-004 Final Security Fix: Pinpoint upgrade for Tomcat Core    == -->
         <!-- ===================================================================== -->
         <tomcat.version>10.1.44</tomcat.version>
         <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
+        <!-- 橫貫任務 C.1 -->
+        <!--
+        <junit-bom.version>5.10.2</junit-bom.version>
+        <mockito.version>5.11.0</mockito.version>
+        -->
+        <jacoco.version>0.8.12</jacoco.version>
+        <!-- 橫貫任務 C.1.2 -->
+        <testcontainers.version>1.19.8</testcontainers.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -92,20 +100,58 @@
                 <version>4.1.8</version>
             </dependency>
 
-            <!-- Spring Cloud 的 BOM 依然在此處，但我們上面的直接聲明，將覆蓋它的建議 -->
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring-cloud.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
             <dependency>
                 <groupId>net.logstash.logback</groupId>
                 <artifactId>logstash-logback-encoder</artifactId>
                 <version>${logstash-logback-encoder.version}</version>
             </dependency>
+            <!-- 橫貫任務 C.1 -->
+            <!--
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+            -->
+            <!-- 橫貫任務 C.1.2 -->
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${testcontainers.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- 橫貫任務 C.1.3 -->
+            <!-- 1. 採購“容器指揮官” -->
+            <dependency>
+                <groupId>org.wiremock.integrations.testcontainers</groupId>
+                <artifactId>wiremock-testcontainers-module</artifactId>
+                <version>1.0-alpha-15</version>
+                <scope>test</scope>
+            </dependency>
+            <!-- 2. 採購“通信客戶端” -->
+            <dependency>
+                <groupId>org.wiremock</groupId>
+                <artifactId>wiremock-standalone</artifactId>
+                <version>3.9.1</version>
+                <scope>test</scope>
+            </dependency>
+            <!-- 為 Testcontainers 的 JUnit 5 集成模塊，簽署一份“採購協議” -->
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${testcontainers.version}</version>
+                <scope>test</scope>
+            </dependency>
+
             <dependency>
                 <groupId>com.projectdavinci</groupId>
                 <artifactId>common-library</artifactId>
@@ -113,4 +159,62 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>report</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>check</id>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                            <configuration>
+                                <rules>
+                                    <rule>
+                                        <element>CLASS</element>
+                                        <!-- ================================================================= -->
+                                        <!-- == 【【【 唯一的、核心的修正 】】】 == -->
+                                        <!-- ================================================================= -->
+                                        <!-- 命令憲兵，只對以下“核心作戰單位”，執行軍規審查 -->
+                                        <includes>
+                                            <include>com.projectdavinci.gatewayservice.AuthenticationFilter</include>
+                                            <include>com.projectdavinci.beaconservice.BeaconEventConsumer</include>
+                                        </includes>
+                                        <excludes>
+                                            <!-- 同時，明確地，豁免所有“司令部” (Application 類) -->
+                                            <exclude>*Application</exclude>
+                                        </excludes>
+                                        <limits>
+                                            <limit>
+                                                <counter>LINE</counter>
+                                                <value>COVEREDRATIO</value>
+                                                <minimum>0.80</minimum>
+                                            </limit>
+                                        </limits>
+                                    </rule>
+
+                                </rules>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>

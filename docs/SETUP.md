@@ -1,5 +1,5 @@
-# 《朝聖者的指引：本地作戰平台搭建指南 (SETUP.md)》
-# 版本：1.0
+# 《同好的指引：本地作戰平台搭建指南 (SETUP.md)》
+# 版本：1.1
 
 歡迎，探索者。
 
@@ -34,6 +34,16 @@
     curl -s "https://get.sdkman.io" | bash
     source "$HOME/.sdkman/bin/sdkman-init.sh"
     ```
+
+    ** 導入 k6 的官方 GPG 密鑰 **
+    sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+
+    ** 添加 k6 的官方軟體源 **
+    echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+
+    ** 安裝 **
+    sudo apt-get update
+    sudo apt-get install k6
 
 2.  **安裝 Java 引擎 (Amazon Corretto 21)**
     *   我們選用 Amazon Corretto 21 作為我們宇宙的核心動力源。
@@ -84,21 +94,21 @@ Docker Desktop 是我們連接 Windows 主機與 WSL 宇宙的關鍵港灣。
 | `mvn -v` | 應顯示 Apache Maven 3.8.x 或更高 |
 | `docker --version` | 應顯示 Docker version, e.g., "26.1.1" |
 | `git --version` | 應顯示 git version, e.g., "2.34.1" |
-
+| `k6 version` | 應顯示 k6 version, e.g., "v0.52.0" |
 ---
 
-### **朝聖之旅的終點：執行「創世儀式」**
+### **執行「創世儀式」**
 
 至此，您的作戰平台已萬事俱備。
 
-1.  **克隆專案藍圖：**
+1.  **Clone project：**
     ```bash
     git clone https://github.com/daVinci-hong/sand-box-microcosm.git
     cd sand-box-microcosm
     ```
 2.  **執行儀式：**
     ```bash
-    # 導航至腳本所在目錄
+    # 進入 script 所在目錄
     cd scripts
     # 賦予執行權限 (僅需一次)
     chmod +x genesis.sh
@@ -106,6 +116,6 @@ Docker Desktop 是我們連接 Windows 主機與 WSL 宇宙的關鍵港灣。
     ./genesis.sh
     ```
 
-遵循腳本的指引完成最後的構建。儀式結束後，您的宇宙便已準備好，可以通過 `docker-compose up` 來喚醒。
+遵循 script 的指引完成最後的構建。儀式結束後，您的宇宙便已準備好，可以通過 `docker-compose up` 來喚醒。
 
 **搭建完成。歡迎加入 Project Da Vinci。**

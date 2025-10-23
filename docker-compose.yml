@@ -4,6 +4,9 @@ services:
     build:
       context: .
       dockerfile: src/gateway-service/Dockerfile
+      cache_from:
+        - maven:3.9-amazoncorretto-21
+        - amazoncorretto:21-alpine-jdk
     ports:
       - "8080:8080"
     container_name: gateway-service
@@ -35,9 +38,12 @@ services:
     volumes:
       # 將包含探針的目錄，掛載到容器內部
       - ./agents:/app/agents
+      - maven_cache:/root/.m2
     # ... depends_on, restart ...
     depends_on:
       beacon-service:
+        condition: service_started
+      redis:
         condition: service_started
     restart: on-failure
 
@@ -45,6 +51,9 @@ services:
     build:
       context: .
       dockerfile: src/beacon-service/Dockerfile
+      cache_from:
+        - maven:3.9-amazoncorretto-21
+        - amazoncorretto:21-alpine-jdk
     ports:
       - "8081:8081"
     container_name: beacon-service
@@ -76,6 +85,7 @@ services:
     volumes:
       # 將包含探針的目錄，掛載到容器內部
       - ./agents:/app/agents
+      - maven_cache:/root/.m2
     # ... depends_on, restart ...
     depends_on:
       kafka:
@@ -201,6 +211,21 @@ services:
       - "4317:4317"  # OTLP gRPC Receiver
     restart: on-failure
 
+  # =================================================================
+  # == ADR-007: 部署 Redis (用於分散式 Rate Limiting) ==
+  # =================================================================
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis-server
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    restart: on-failure
+
 # 在文件末尾，定義持久化的數據卷
 volumes:
   tempo-data:
+  redis-data:
+  maven_cache:
