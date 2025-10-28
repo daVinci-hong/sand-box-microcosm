@@ -1,0 +1,27 @@
+# Tempo 追蹤系統覆蓋配置
+services:
+  gateway-service:
+    environment:
+      # 指向 Tempo 的 OTEL 端點
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
+
+  beacon-service:
+    environment:
+      # 指向 Tempo 的 OTEL 端點
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
+
+  # =================================================================
+  # == ADR-008: 部署 Grafana Tempo 時空記憶體 ==
+  # =================================================================
+  tempo:
+    image: grafana/tempo:2.4.1
+    container_name: tempo-server
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./config/tempo/tempo.yaml:/etc/tempo.yaml
+      # 為 Tempo 的本地存儲，創建一個持久化的數據卷
+      - tempo-data:/tmp/tempo
+    ports:
+      - "3200:3200" # Tempo UI / HTTP
+      - "4317:4317" # OTLP gRPC Receiver
+    restart: on-failure

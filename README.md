@@ -21,7 +21,7 @@
 
 *   它的表層軌道，是 **《沙盤微縮宇宙》**，一部**技術的極致展演**。其流暢的自動化管道、堅固的零信任堡壘、洞察一切的全知之眼，是為少數能欣賞其複雜之美的 **「雅士」**(具相關技術背景)而備。
 
-*   它的深層軌道，是 **《英雄的煉成》**，一部**靈魂的深刻敘事**。我過去幾年每一場非對稱戰役的傷疤、智慧與榮光，都將作為「證人」被請上舞台，這是為所有像我一樣渴望力量與勇氣的 **「一般人」**(無相關技術背景)而備。
+*   它的深層軌道，是 **《行者的獨白》**，一部**靈魂的深刻敘事**。我過去幾年每一場非對稱戰役的傷疤、智慧與榮光，都將作為「證人」被請上舞台，這是為所有像我一樣渴望力量與勇氣的 **「一般人」**(無相關技術背景)而備。
 
 表層的技術與深層的故事，如鑽石的切面與其內在的火焰，互相輝映，共同鑄造了這個獨一無二的、活的履歷。
 
@@ -107,13 +107,19 @@
 ---
 
 ### **第五幕：不朽的靈魂 (Act V: The Immortal Soul)**
-**狀態：** 規劃中 ⏳
+**狀態：** 已完成 ✅
 
 *   **核心敘事：演化與適應**
-    待續...
+    在鑄造「不朽的靈魂」時，我的核心設計哲學是：一個只忠於其物理形態（具體技術實現）的系統，注定會被時間所淘汰。一個忠於其靈魂契約（抽象介面與意圖）的系統，將獲得永生。我們追求的，不是選擇「最好」的工具，而是建立一個可以讓工具被自由替換的、反脆弱的架構。
+
+    這個哲學，源於我職業生涯中一場充滿了孤獨與背叛的「鑄劍師」戰役。在那場戰役中，我使用了，「用程式寫程式」當作應對重複性混沌的最高級武器；也學會了，一個無法理解你價值的體系，不值得你忠誠。
+
+    所以，今天您看到的「靈魂與肉身分離」架構，不僅僅是一次技術的解耦。它，是我將當年作為「鑄劍師」時，所領悟的、關於「抽象即是自由」的實戰心法，進行的一次系統性的、充滿敬意的重述與升級。
 
 *   **技術目標**
-    待續...
+    *   [x] **任務 5.1:** 抽象訊息服務介面，實現與具體中介軟體的解耦。
+    *   [x] **任務 5.2:** 實現並演示從 Kafka 到 RabbitMQ 的平滑遷移。
+    *   [x] **任務 5.3:** 演示可觀測性後端從 Tempo 到 Jaeger 的平滑遷移。
 
 ---
 
@@ -141,6 +147,7 @@
 | 韌性組件 | Resilience4j | 服務熔斷、重試 |
 | 異步通信 | Apache Kafka / RabbitMQ | 事件驅動、服務解耦 |
 | 可觀測性 | OpenTelemetry / Grafana Stack | 日誌、指標、追蹤 |
+| 分散式追蹤 | Grafana Tempo / Jaeger | 可切換的追蹤後端 |
 | 容器化 | Docker / Docker Compose | 環境一致性與服務編排 |
 | CI/CD | GitHub Actions | 自動化建置、測試、部署 |
 | 安全掃描 | Trivy | 容器鏡像漏洞掃描 |
@@ -164,9 +171,13 @@ git clone https://github.com/daVinci-hong/sand-box-microcosm.git
 # 2. 進入專案目錄
 cd sand-box-microcosm
 
-# 3. 使用 Docker Compose 一鍵啟動所有服務
+# 3. 使用 Docker Compose 一鍵啟動所有服務 (預設使用 Tempo 追蹤系統)
 docker-compose up -d
+
+# 如果是首次啟動或程式碼有更新，使用：
+# docker-compose up --build -d
 ```
+
 #### 方式二：建築師的饋贈 (The Architect's Gift)
 為了提供極致的無摩擦體驗，我們額外提供了一個可選的 `genesis.sh` 輔助script 。它不僅能一鍵啟動所有服務，更能預先處理環境檢查、拉取最新鏡像等繁瑣任務。
 
@@ -179,6 +190,29 @@ chmod +x ./scripts/genesis.sh
 ./scripts/genesis.sh
 ```
 
+### 3. 追蹤系統切換：靈魂的變形 (Tracing System Switch: Soul Metamorphosis)
+作為第五幕「不朽的靈魂」的核心展現，本宇宙實現了追蹤系統的無縫切換能力。系統預設使用 **Tempo** 作為分散式追蹤後端，但您可以根據需要切換至 **Jaeger**。
+
+#### 切換至 Jaeger
+```bash
+# Windows
+scripts\switch-compose.bat jaeger
+
+# Linux/WSL
+./scripts/switch-compose.sh jaeger
+```
+
+#### 切換回 Tempo
+```bash
+# Windows
+scripts\switch-compose.bat tempo
+
+# Linux/WSL
+./scripts/switch-compose.sh tempo
+```
+
+> 📖 **[完整追蹤系統指南：/docs/TRACING_SYSTEM_GUIDE.md](docs/TRACING_SYSTEM_GUIDE.md)**
+
 
 ## **第六章：建築師的法典 (Chapter VI: The Architect's Codex)**
 本宇宙的建造，遵循著一套嚴格的、源於實戰的工程與原則。
@@ -186,3 +220,13 @@ chmod +x ./scripts/genesis.sh
 *   **版本控制：** 受保護主幹的拉取請求工作流
 *   **程式碼風格：** Google Java 風格指南
 **[👉 點此進入【檔案館】，閱覽我們的完整文件 ](/docs)**
+
+
+
+ ## **第七章：測試驗證所 (Chapter VII: The Verification Chamber)**
+
+ 想見證我們每一幕「執行結果」的 **「步驟」** 與 **「畫面」** 的同好。
+
+ 我們，已將全部五幕劇的 **《驗證記錄》**，完整地，封存於我們的【驗證所】之中。
+
+ **[👉 點此進入【測試驗證所】，閱覽我們所有執行結果](/docs/verifications/)**

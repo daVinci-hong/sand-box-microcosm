@@ -85,6 +85,16 @@
             <version>4.2.1</version>
             <scope>test</scope>
         </dependency>
+        <!-- MOP 5.2 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.projectdavinci</groupId>
+            <artifactId>common-library</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <!-- 4. Add the Spring Boot Maven Plugin for packaging -->

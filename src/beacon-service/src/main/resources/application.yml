@@ -15,7 +15,8 @@ spring:
       # 信任我們的事件契約所在的包
       properties:
         spring.json.trusted.packages: "com.projectdavinci.common.events"
-
+  rabbitmq:
+    host: rabbitmq
 #ADR-006: Micrometer 與 Prometheus 生命體徵配置
 management:
   endpoints:

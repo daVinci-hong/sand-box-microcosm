@@ -1,10 +1,12 @@
 package com.projectdavinci.beaconservice;
 
 import com.projectdavinci.common.events.BeaconEvent;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 @Service
+@Profile("kafka") // 僅在“卡夫卡模式”下激活
 public class BeaconEventConsumer {
 
     // =================================================================

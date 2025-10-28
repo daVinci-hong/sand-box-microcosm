@@ -1,19 +1,25 @@
-# The Da Vinci Project License (DVL) v1.0
+Copyright (c) 2025 Hong Lin.
+All rights reserved except as permitted herein.
+
+# The Da Vinci Project License (DVL) v1.1
 
 This project, "The War Table Microcosm" (sand-box-microcosm), is a personal thought experiment and a living portfolio by Hong Lin.
 
 ## **Core Intent: A Monument for Learning, Not a Tool for Production**
+
 This work is shared with the world for one purpose and one purpose only: **for educational, demonstrative, and inspirational purposes.**
 
 It is an "artwork" to be studied, a "map" to be explored, a "story" to be read.
 It is **NOT** a production-ready, open-source tool intended for direct use in commercial or operational environments.
 
 ## **Permissions**
+
 You are free to:
 *   **Learn from it:** Fork it, read it, analyze it, and use its architectural patterns and philosophical concepts as inspiration for your own work.
 *   **Discuss it:** Share it, write about it, and engage in thoughtful conversation about its ideas.
 
 ## **Restrictions**
+
 You are **NOT** permitted to:
 *   Use this software, in whole or in part, for any commercial purpose.
 *   Incorporate this software into any production system.

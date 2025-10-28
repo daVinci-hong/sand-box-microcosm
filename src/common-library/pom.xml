@@ -11,4 +11,19 @@
     <artifactId>common-library</artifactId>
     <name>Common Library</name>
     <description>Shared DTOs, Events, and Utilities for the universe.</description>
+    <dependencies>
+        <!-- ================================================================= -->
+        <!-- == 【【【 唯一的、核心的修正：授予“基礎知識” 】】】 == -->
+        <!-- ================================================================= -->
+        <!-- 1. 授予，關於“Spring AMQP”的知識 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+        <!-- 我們，依然，需要，關於“Spring Context”的知識 -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+    </dependencies>
 </project>

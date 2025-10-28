@@ -10,7 +10,6 @@ services:
     ports:
       - "8080:8080"
     container_name: gateway-service
-    # ... build, ports, container_name ...
     environment:
       # =================================================================
       # == ADR-008: 激活 OpenTelemetry 時空探針 ==
@@ -19,27 +18,24 @@ services:
       - JAVA_TOOL_OPTIONS=-javaagent:/app/agents/opentelemetry-javaagent.jar
       # 2. 為服務命名，這將成為追蹤數據中的 service.name 標籤
       - OTEL_SERVICE_NAME=gateway-service
-      # 3. 告知探針，應將捕獲到的數據，上報給哪個地址
-      # 我們，為“語法警察”，提供他所需要的、那個包含了協議的、
-      # 語法絕對正確的“外交護照”。
+      # 3. 告知探針，應將捕獲到的數據，上報給哪個地址 (切換到 Tempo)
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
-
-      # 然後，我們，以最高權限，為我們的“外交官”，頒布一道
-      # 絕對的、不可違抗的“口頭密令”，命令他，在抵達邊境時，
-      # 必須，也只能，說 gRPC 這種語言。
+      # == ADR-010: 模式切換器 ==
+      #      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
       - OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=grpc
-      # 我們，以最高權限，命令“日誌之眼”與“指標之眼”，
-      # 保持絕對的、永恆的沉默。
-      # 因為，它們的職責，早已由我們更為專業的 Loki 與 Prometheus 所取代。
       - OTEL_LOGS_EXPORTER=none
-      - OTEL_METRICS_EXPORTER=none      
+      - OTEL_METRICS_EXPORTER=none
       # 4. [關鍵] 告知探針，Kafka 的消息傳播，也應被視為因果鏈路的一部分
       - OTEL_INSTRUMENTATION_KAFKA_CLIENT_PROPAGATION_ENABLED=true
+      # =================================================================
+      # == ADR-010: 模式切換器 ==
+      # =================================================================
+      - SPRING_PROFILES_ACTIVE=kafka # 可切換為 rabbitmq
+      #      - SPRING_PROFILES_ACTIVE=rabbitmq # 可切換為 kafka
     volumes:
       # 將包含探針的目錄，掛載到容器內部
       - ./agents:/app/agents
       - maven_cache:/root/.m2
-    # ... depends_on, restart ...
     depends_on:
       beacon-service:
         condition: service_started
@@ -57,7 +53,6 @@ services:
     ports:
       - "8081:8081"
     container_name: beacon-service
-    # ... build, ports, container_name ...
     environment:
       # =================================================================
       # == ADR-008: 激活 OpenTelemetry 時空探針 ==
@@ -66,27 +61,24 @@ services:
       - JAVA_TOOL_OPTIONS=-javaagent:/app/agents/opentelemetry-javaagent.jar
       # 2. 為服務命名，這將成為追蹤數據中的 service.name 標籤
       - OTEL_SERVICE_NAME=beacon-service
-      # 3. 告知探針，應將捕獲到的數據，上報給哪個地址
-      # 我們，為“語法警察”，提供他所需要的、那個包含了協議的、
-      # 語法絕對正確的“外交護照”。
+      # 3. 告知探針，應將捕獲到的數據，上報給哪個地址 (切換到 Tempo)
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
-
-      # 然後，我們，以最高權限，為我們的“外交官”，頒布一道
-      # 絕對的、不可違抗的“口頭密令”，命令他，在抵達邊境時，
-      # 必須，也只能，說 gRPC 這種語言。
+      # == ADR-010: 模式切換器 ==
+      #      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
       - OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=grpc
-      # 我們，以最高權限，命令“日誌之眼”與“指標之眼”，
-      # 保持絕對的、永恆的沉默。
-      # 因為，它們的職責，早已由我們更為專業的 Loki 與 Prometheus 所取代。
       - OTEL_LOGS_EXPORTER=none
-      - OTEL_METRICS_EXPORTER=none      
+      - OTEL_METRICS_EXPORTER=none
       # 4. [關鍵] 告知探針，Kafka 的消息傳播，也應被視為因果鏈路的一部分
       - OTEL_INSTRUMENTATION_KAFKA_CLIENT_PROPAGATION_ENABLED=true
+      # =================================================================
+      # == ADR-010: 模式切換器 ==
+      # =================================================================
+      - SPRING_PROFILES_ACTIVE=kafka # 可切換為 rabbitmq
+      #      - SPRING_PROFILES_ACTIVE=rabbitmq # 可切換為 kafka
     volumes:
       # 將包含探針的目錄，掛載到容器內部
       - ./agents:/app/agents
       - maven_cache:/root/.m2
-    # ... depends_on, restart ...
     depends_on:
       kafka:
         condition: service_healthy
@@ -109,23 +101,21 @@ services:
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
     healthcheck:
-      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list"]
+      test:
+        [
+          "CMD-SHELL",
+          "kafka-topics.sh --bootstrap-server localhost:9092 --list",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 20s
-# ... existing kafka service ...
+
   kafka-init-topics:
     image: bitnamilegacy/kafka:3.3.2
     depends_on:
       kafka:
         condition: service_healthy
-    # =================================================================
-    # ==      【【【 唯一的、最終的、純淨的作戰手冊 】】】      ==
-    # =================================================================
-    # 我們，將那個幽靈的、不存在的、也根本不必要的“cub”指令，徹底驅逐。
-    # “depends_on”的秩序，早已確保了，當這位“立法者”被喚醒時，
-    # Kafka，早已準備就緒。
     command: >
       bash -c "
         echo 'Kafka broker is ready, proceeding with topic creation...' &&
@@ -137,14 +127,13 @@ services:
   # == ADR-006: 部署 Prometheus 監控哨站 ==
   # =================================================================
   prometheus:
-    image: prom/prometheus:v2.53.0 # 使用一個明確的版本以保證可複現性
+    image: prom/prometheus:v2.53.0
     container_name: prometheus-server
     ports:
       - "9090:9090"
     volumes:
       - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     command: --config.file=/etc/prometheus/prometheus.yml
-    # 確保 Prometheus 在我們的服務啟動後再啟動，以避免初始的服務發現失敗
     depends_on:
       gateway-service:
         condition: service_started
@@ -156,7 +145,7 @@ services:
   # == ADR-006: 部署 Grafana 戰情可視化中心 ==
   # =================================================================
   grafana:
-    image: grafana/grafana:11.1.0 # 使用一個明確的版本
+    image: grafana/grafana:11.1.0
     container_name: grafana-dashboard
     ports:
       - "3000:3000"
@@ -167,7 +156,6 @@ services:
       # == ADR-009: [新增] 掛載儀表板供應鏈目錄 ==
       # =================================================================
       - ./config/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
-    # ... depends_on, restart ...    # 確保 Grafana 在 Prometheus 準備就緒後再啟動
     depends_on:
       prometheus:
         condition: service_started
@@ -187,8 +175,6 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./config/promtail/config.yml:/etc/promtail/config.yml
-    # 我們，以 root 用戶的身份，來運行這位“情報收集官”，
-    # 授予他，訪問 Docker“中央情報頻道”的、至高無上的權力。
     user: root
     command: -config.file=/etc/promtail/config.yml
     depends_on:
@@ -199,7 +185,7 @@ services:
   # == ADR-008: 部署 Grafana Tempo 時空記憶體 ==
   # =================================================================
   tempo:
-    image: grafana/tempo:2.4.1 # 使用一個明確的版本
+    image: grafana/tempo:2.4.1
     container_name: tempo-server
     command: ["-config.file=/etc/tempo.yaml"]
     volumes:
@@ -207,9 +193,20 @@ services:
       # 為 Tempo 的本地存儲，創建一個持久化的數據卷
       - tempo-data:/tmp/tempo
     ports:
-      - "3200:3200"  # Tempo UI / HTTP
-      - "4317:4317"  # OTLP gRPC Receiver
+      - "3200:3200" # Tempo UI / HTTP
+      - "4317:4317" # OTLP gRPC Receiver
     restart: on-failure
+
+  # =================================================================
+  # == ADR-010: 植入 Jaeger 新器官 (目前禁用) ==
+  # =================================================================
+  #  jaeger:
+  #    image: jaegertracing/all-in-one:1.57
+  #    container_name: jaeger-server
+  #    ports:
+  #      - "16686:16686" # Jaeger UI
+  #      - "4317:4317"  # OTLP gRPC Receiver
+  #    restart: on-failure
 
   # =================================================================
   # == ADR-007: 部署 Redis (用於分散式 Rate Limiting) ==
@@ -223,6 +220,21 @@ services:
     volumes:
       - redis-data:/data
     restart: on-failure
+
+  # =================================================================
+  # == ADR-010: 採用抽象化與標準化接口，實現核心基礎設施組件的可互換性
+  # =================================================================
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: rabbitmq-broker
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 # 在文件末尾，定義持久化的數據卷
 volumes:

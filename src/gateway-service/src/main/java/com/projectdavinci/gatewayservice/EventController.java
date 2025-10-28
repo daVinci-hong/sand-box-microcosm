@@ -1,41 +1,40 @@
 package com.projectdavinci.gatewayservice;
 
-
 import com.projectdavinci.common.events.BeaconEvent;
-
+import com.projectdavinci.common.services.MessagingService; // 【【【 導入“抽象” 】】】
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
 import java.util.UUID;
 
-import com.projectdavinci.common.events.BeaconEvent;
-
 @RestController
 public class EventController {
 
-    @Autowired
-    private KafkaTemplate<String, BeaconEvent> kafkaTemplate;
-
+    // =================================================================
+    // == 【【【 唯一的、核心的修正：依賴“抽象”，而非“具體” 】】】 ==
+    // =================================================================
+    private final MessagingService messagingService;
     private static final String TOPIC = "topic.beacon.events";
+
+    @Autowired
+    public EventController(MessagingService messagingService) {
+        this.messagingService = messagingService;
+    }
 
     @PostMapping("/trigger-beacon-event")
     public String triggerBeaconEvent() {
-        // 從認證上下文中獲取用戶信息 (此處為模擬)
         String user = "gateway-service";
-
         BeaconEvent event = new BeaconEvent(
                 UUID.randomUUID().toString(),
                 user,
                 Instant.now()
         );
 
-        // 將事件異步發送到 Kafka 神經中樞
-        kafkaTemplate.send(TOPIC, event);
+        // 我們，將，通過“抽象”，去，發布事件
+        messagingService.publishEvent(TOPIC, event);
 
-        // 立即返回響應，無需等待下游處理
         return "Beacon event triggered with ID: " + event.eventId();
     }
 }

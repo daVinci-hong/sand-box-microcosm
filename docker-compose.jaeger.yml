@@ -1,0 +1,22 @@
+# Jaeger 追蹤系統覆蓋配置
+services:
+  gateway-service:
+    environment:
+      # 指向 Jaeger 的 OTEL 端點
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+
+  beacon-service:
+    environment:
+      # 指向 Jaeger 的 OTEL 端點
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+
+  # =================================================================
+  # == ADR-010: 植入 Jaeger 新器官 ==
+  # =================================================================
+  jaeger:
+    image: jaegertracing/all-in-one:1.57
+    container_name: jaeger-server
+    ports:
+      - "16686:16686" # Jaeger UI
+      - "4317:4317"  # OTLP gRPC Receiver
+    restart: on-failure

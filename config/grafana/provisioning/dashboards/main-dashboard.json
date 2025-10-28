@@ -346,7 +346,7 @@
     {
       "datasource": {
         "type": "tempo",
-        "uid": "Tempo-Main"
+        "uid": "Tracing-Main"
       },
       "fieldConfig": {
         "defaults": {
@@ -423,7 +423,7 @@
         {
           "datasource": {
             "type": "tempo",
-            "uid": "Tempo-Main"
+            "uid": "Tracing-Main"
           },
           "filters": [
             {

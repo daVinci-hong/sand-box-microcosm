@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.KafkaContainer;
@@ -22,6 +23,7 @@ import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @Testcontainers
+@ActiveProfiles("kafka")
 class KafkaIntegrationTest {
 
     // 1. 聲明一個由 Testcontainers 管理的 Kafka 容器

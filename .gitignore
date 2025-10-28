@@ -21,6 +21,8 @@
 .idea/caches/
 .idea/modules.xml
 
+.cache/
+
 # Gradle
 .gradle/
 build/
@@ -51,4 +53,12 @@ buildNumber.properties
 *.tar.gz
 *.rar
 
+#kiro 個人設定
+.vscode/
+.kiro/
+
+#臨時筆記
 temp.md
+
+#本地暫存檔
+temp/

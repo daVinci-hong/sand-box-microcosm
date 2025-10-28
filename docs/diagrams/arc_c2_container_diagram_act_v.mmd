@@ -1,0 +1,65 @@
+graph TD
+    %% C2 - Container Diagram for Act V: The Seamless Heart Transplant
+    %% Version 5.0 - The Final Philosophical Form
+
+    A["<b>指揮官 / 開發人員</b>"]
+
+    subgraph "主應用系統"
+        direction LR
+        
+        C1["
+            <b>Gateway Service</b>
+            <br>
+            [容器: Spring Cloud Gateway]
+            <br>
+            ---
+            <b>靈魂契約:</b>
+            <br>
+            - 只依賴 MessagingService 接口
+            <br>
+            - 只依賴 OTel 標準 Agent
+        "]
+
+        Abs_MQ["
+            <b>消息系統</b>
+            <br>
+            [可插拔: Kafka / RabbitMQ]
+            <br>
+            <br>
+            宇宙的中央神經系統
+        "]
+
+        C2["
+            <b>Beacon Service</b>
+            <br>
+            [容器: Spring Boot]
+            <br>
+            ---
+            <b>靈魂契約:</b>
+            <br>
+            - 只依賴 OTel 標準 Agent
+        "]
+    end
+
+    subgraph "全知之眼 - 可觀測性系統"
+        Abs_Trace["
+            <b>追蹤後端</b>
+            <br>
+            [可插拔: Tempo / Jaeger]
+        "]
+        Grafana["<b>Grafana</b>"]
+        Prometheus["<b>Prometheus</b>"]
+        Loki["<b>Loki</b>"]
+    end
+
+    %% Data Flows
+    A -- "API 請求" --> C1
+    C1 -- "發布事件 (通過抽象接口)" --> Abs_MQ
+    Abs_MQ -- "消費事件" --> C2
+
+    C1 -- "遙測數據 (通過 OTel Agent)" --> Abs_Trace & Prometheus & Loki
+    C2 -- "遙測數據 (通過 OTel Agent)" --> Abs_Trace & Prometheus & Loki
+    
+    Abs_Trace --> Grafana
+    Prometheus --> Grafana
+    Loki --> Grafana

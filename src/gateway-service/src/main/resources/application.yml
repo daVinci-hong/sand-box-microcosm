@@ -39,7 +39,11 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       # 使用 JSON 序列化器來發送我們的事件對象
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-  
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: guest
+    password: guest
   # ----------------------------------------------------------
   # Redis 配置 (用於分散式 Rate Limiting)
   # ----------------------------------------------------------
