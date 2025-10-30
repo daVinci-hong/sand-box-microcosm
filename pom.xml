@@ -50,7 +50,7 @@
         <!-- ===================================================================== -->
         <!-- == ADR-004 Final Security Fix: Pinpoint upgrade for Tomcat Core    == -->
         <!-- ===================================================================== -->
-        <tomcat.version>10.1.44</tomcat.version>
+        <tomcat.version>10.1.45</tomcat.version>
         <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
         <!-- 橫貫任務 C.1 -->
         <!--
