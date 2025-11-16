@@ -12,6 +12,18 @@
 
 ---
 
+## **序章：建築師的獨白 (Prologue: The Architect's Monologue)**
+
+**在踏入這座聖殿之前，請您，首先，靜聽它的心跳。**
+
+<a href="https://youtu.be/a7iMVuXYjqk" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.youtube.com/vi/a7iMVuXYjqk/maxresdefault.jpg" alt="《建築師的獨白》預告片">
+</a>
+
+*(點擊圖像，觀看一部關於「思想與形式」的交響樂)*
+
+---
+
 ## 第一章：一部雙軌的電影 (Chapter I: A Dual-Track Film)
 
 本計畫，是在 **25 天的業餘時間**內，由一位「技術已生疏的老兵」，與他的 AI 夥伴，共同完成的一次 **「人機協作效率極限」** 的公開探索。
